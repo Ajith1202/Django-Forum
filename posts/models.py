@@ -56,7 +56,7 @@ class Comment(models.Model):
 
 class PostVote(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_vote")
-    author = models.OneToOneField(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     vote_type = models.IntegerField(choices = (
         (1, 'Upvote'),
         (-1, 'Downvote'),
@@ -66,7 +66,7 @@ class PostVote(models.Model):
 
 class CommentVote(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="comment_vote")
-    author = models.OneToOneField(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     vote_type = models.IntegerField(choices = (
         (1, 'Upvote'),
         (-1, 'Downvote'),

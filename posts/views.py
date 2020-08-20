@@ -1,3 +1,7 @@
 from django.shortcuts import render
+from django.http import HttpResponse
+from .models import *
 
-# Create your views here.
+def list_view(request):
+    queryset = Post.objects.all()
+    return HttpResponse(queryset)
