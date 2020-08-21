@@ -9,7 +9,7 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('post', 'description', 'author', 'submitted_on',)
+        fields = ('description', 'author', 'submitted_on',)
 
 class PostVoteSerializer(serializers.ModelSerializer):
     class Meta:
