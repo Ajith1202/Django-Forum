@@ -27,7 +27,6 @@ class Post(models.Model):
         return sum(queryset)
     
 
-
 class Comment(models.Model):
     description = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
@@ -51,7 +50,6 @@ class Comment(models.Model):
         queryset = self.comment_vote.all()
         queryset = [i.vote_type for i in queryset]
         return sum(queryset)
-
 
 
 class PostVote(models.Model):
