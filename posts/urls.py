@@ -2,7 +2,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('', ListAPIView, name='home'),
+    path('', ListAPIView, name='home'), # Lists all the posts & Add posts
     path('posts/<int:pk>/', DetailAPIView, name='post'),
     path('posts/<int:pk>/comments/', CommentAddAPIView, name='add_comment')
 ]

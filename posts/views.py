@@ -8,13 +8,17 @@ def ListAPIView(request):
     if request.method == 'GET':
         queryset = Post.objects.all()
         serializer = PostSerializer(queryset, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        for post in data:
+            item = Post.objects.get(id=post["id"])
+            post["Upvotes"] = item.upvotes()
+            post["Downvotes"] = item.downvotes()
+        return Response(data)
     elif request.method == 'POST':
         title = request.data.get('title')
         description = request.data.get('description')
         post = Post.objects.create(title=title, description=description, author=request.user)
         serializer = PostSerializer(post, many=False)
-        
         return Response(serializer.data)  
 
 @api_view(['GET'])
@@ -23,10 +27,13 @@ def DetailAPIView(request, pk):
     serialized_data = PostSerializer(post, many=False).data
     
     post_votes = post.post_vote.all()
-    serialized_data["votes"] = PostVoteSerializer(post_votes, many=True).data
+    serialized_data["Votes"] = {
+        "Upvotes": post.upvotes(),
+        "Downvotes": post.downvotes()
+    }
 
     comments = post.comment_set.all()
-    serialized_data["comments"] = CommentSerializer(comments, many=True).data
+    serialized_data["Comments"] = CommentSerializer(comments, many=True).data
     
 
     return Response(serialized_data)
