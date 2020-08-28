@@ -3,11 +3,19 @@ from rest_framework.response import Response
 from .models import *
 from .serializers import *
 
-@api_view(['GET',])
+@api_view(['GET', 'POST'])
 def ListAPIView(request):
-    queryset = Post.objects.all()
-    serializer = PostSerializer(queryset, many=True)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        queryset = Post.objects.all()
+        serializer = PostSerializer(queryset, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        title = request.data.get('title')
+        description = request.data.get('description')
+        post = Post.objects.create(title=title, description=description, author=request.user)
+        serializer = PostSerializer(post, many=False)
+        
+        return Response(serializer.data)  
 
 @api_view(['GET'])
 def DetailAPIView(request, pk):
@@ -22,3 +30,13 @@ def DetailAPIView(request, pk):
     
 
     return Response(serialized_data)
+
+@api_view(['POST'])
+def CommentAddAPIView(request, pk):
+    post = Post.objects.get(id=pk)
+    comment = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post)
+    serialized_data = CommentSerializer(comment, many=False)
+    if request.data.get("description"):
+        return Response(serialized_data.data)    
+
+        
