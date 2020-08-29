@@ -46,4 +46,12 @@ def CommentAddAPIView(request, pk):
     if request.data.get("description"):
         return Response(serialized_data.data)    
 
-        
+@api_view(['GET'])
+def PostVoteAddAPIView(request, post_id, vote_type):
+    post = Post.objects.get(id=post_id)
+    if vote_type == 1:
+        vote = PostVote.objects.create(post=post, author=request.user, vote_type=1)
+    elif vote_type == 0:
+        vote = PostVote.objects.create(post=post, author=request.user, vote_type=-1)
+
+    return Response(PostVoteSerializer(vote, many=False).data)
