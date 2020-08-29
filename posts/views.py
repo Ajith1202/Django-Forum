@@ -54,3 +54,12 @@ def PostVoteAddAPIView(request, post_id, vote_type):
         vote = PostVote.objects.create(post=post, author=request.user, vote_type=-1)
 
     return Response(PostVoteSerializer(vote, many=False).data)
+
+@api_view(['DELETE'])
+def PostDeleteAPIView(request, pk):
+    post = Post.objects.get(id=pk)
+    if post.author == request.user:
+        post.delete()    
+        return Response("Your Question has been successfully deleted...")
+    return Response("Sorry, you are not authorized to make changes to this question...")    
+
