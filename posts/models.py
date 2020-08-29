@@ -36,34 +36,9 @@ class Comment(models.Model):
     def __str__(self):
         return self.description
 
-    def upvotes(self):
-        queryset = self.comment_vote.all()
-        queryset = [i.vote_type for i in queryset if i.vote_type == 1]
-        return len(queryset)
-
-    def downvotes(self):
-        queryset = self.comment_vote.all()
-        queryset = [i.vote_type for i in queryset if i.vote_type == -1]
-        return len(queryset)
-    
-    def vote_score(self):
-        queryset = self.comment_vote.all()
-        queryset = [i.vote_type for i in queryset]
-        return sum(queryset)
-
 
 class PostVote(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_vote")
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    vote_type = models.IntegerField(choices = (
-        (1, 'Upvote'),
-        (-1, 'Downvote'),
-    ))
-    voted_on = models.DateTimeField(auto_now_add=True)
-
-
-class CommentVote(models.Model):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="comment_vote")
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     vote_type = models.IntegerField(choices = (
         (1, 'Upvote'),

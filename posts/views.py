@@ -34,7 +34,6 @@ def DetailAPIView(request, pk):
 
     comments = post.comment_set.all()
     serialized_data["Comments"] = CommentSerializer(comments, many=True).data
-    
 
     return Response(serialized_data)
 
