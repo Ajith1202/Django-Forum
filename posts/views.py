@@ -21,21 +21,36 @@ def ListAPIView(request):
         serializer = PostSerializer(post, many=False)
         return Response(serializer.data)  
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 def DetailAPIView(request, pk):
     post = Post.objects.get(id=pk)
     serialized_data = PostSerializer(post, many=False).data
-    
-    post_votes = post.post_vote.all()
-    serialized_data["Votes"] = {
-        "Upvotes": post.upvotes(),
-        "Downvotes": post.downvotes()
-    }
-
     comments = post.comment_set.all()
     serialized_data["Comments"] = CommentSerializer(comments, many=True).data
+    
+    if request.method == 'POST':
+        serialized_data["Votes"] = {
+            "Upvotes": post.upvotes(),
+            "Downvotes": post.downvotes()
+        }
+        return Response(serialized_data)
+    elif request.method == 'PUT':
+        if post.author == request.user:
+            serialized_data = PostSerializer(post, data=request.data, many=False)
+            if serialized_data.is_valid():
+                serialized_data.save()
+                serialized_data = serialized_data.data
+            serialized_data["Votes"] = {
+                "Upvotes": post.upvotes(),
+                "Downvotes": post.downvotes()
+            }
+            serialized_data["Comments"] = CommentSerializer(comments, many=True).data
+            return Response(serialized_data)
+        return Response("Sorry, you are not authorised to make changes to this Question...")    
 
     return Response(serialized_data)
+
+
 
 @api_view(['POST'])
 def CommentAddAPIView(request, pk):
