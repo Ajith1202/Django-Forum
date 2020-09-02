@@ -25,7 +25,10 @@ def ListAPIView(request):
 
 @api_view(['GET', 'PUT'])
 def DetailAPIView(request, pk):
-    post = Post.objects.get(id=pk)
+    try:
+        post = Post.objects.get(id=pk)
+    except Post.DoesNotExist:
+        return Response("The given Question does not exist...")
     serialized_data = PostSerializer(post, many=False).data
     comments = post.comment_set.all()
     serialized_data["Comments"] = CommentSerializer(comments, many=True).data
@@ -53,11 +56,11 @@ def DetailAPIView(request, pk):
     return Response(serialized_data)
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 def CommentAddAPIView(request, pk):
     try:
         post = Post.objects.get(id=pk)
-    except DoesNotExist:
+    except Post.DoesNotExist:
         return Response("The given Question does not exist...")
     comment = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post)
     serialized_data = CommentSerializer(comment, many=False)
@@ -69,7 +72,7 @@ def CommentAddAPIView(request, pk):
 def PostVoteAddAPIView(request, post_id, vote_type):
     try:
         post = Post.objects.get(id=post_id)
-    except DoesNotExist:
+    except Post.DoesNotExist:
         return Response("The given Question does not exist...")
     if vote_type == 1:
         vote = PostVote.objects.create(post=post, author=request.user, vote_type=1)
@@ -81,7 +84,10 @@ def PostVoteAddAPIView(request, post_id, vote_type):
 
 @api_view(['DELETE'])
 def PostDeleteAPIView(request, pk):
-    post = Post.objects.get(id=pk)
+    try:
+        post = Post.objects.get(id=pk)
+    except Post.DoesNotExist:
+        return Response("The given Question does not exist...")
     if post.author == request.user:
         post.delete()    
         return Response("Your Question has been successfully deleted...")
