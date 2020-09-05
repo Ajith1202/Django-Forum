@@ -59,6 +59,7 @@ def DetailAPIView(request, pk):
     return Response(serialized_data)
 
 
+# ADD COMMENTS TO QUESTIONS
 @api_view(['GET', 'POST'])
 def CommentAddAPIView(request, pk):
     # TRY-EXCEPT CLAUSE IN-CASE THE QUESTION DOES NOT EXIST
@@ -73,6 +74,7 @@ def CommentAddAPIView(request, pk):
     return Response("Add content for your comment!!!")    # IF NO DESCRIPTION IS GIVEN FOR THE COMMENT
 
 
+# UPVOTE OR DOWNVOTE A QUESTION
 @api_view(['GET'])
 def PostVoteAddAPIView(request, post_id, vote_type):
     # TRY-EXCEPT CLAUSE IN-CASE THE QUESTION DOES NOT EXIST
@@ -88,6 +90,7 @@ def PostVoteAddAPIView(request, post_id, vote_type):
     return Response(PostVoteSerializer(vote, many=False).data)
 
 
+# DELETE A QUESTION 
 @api_view(['DELETE'])
 def PostDeleteAPIView(request, pk):
     # TRY-EXCEPT CLAUSE IN-CASE THE QUESTION DOES NOT EXIST
