@@ -1,5 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
+
 from .models import *
 from .serializers import *
 
@@ -21,7 +23,7 @@ def ListAPIView(request):
         description = request.data.get('description')
         post = Post.objects.create(title=title, description=description, author=request.user)    # THE CURRENT USER WILL BE THE AUTHOR.
         serializer = PostSerializer(post, many=False)
-        return Response(serializer.data)  
+        return Response(serializer.data, status=status.HTTP_201_CREATED)  
 
 
 # DETAILED VIEW OF A QUESTION , UPDATE A QUESTION
@@ -31,11 +33,15 @@ def DetailAPIView(request, pk):
     try:
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
-        return Response("The given Question does not exist...")
+        return Response(status=status.HTTP_404_NOT_FOUND)
     serialized_data = PostSerializer(post, many=False).data
     comments = post.comment_set.all()    # FETCHING ALL THE COMMENTS OF THE GIVEN POST
     serialized_data["Comments"] = CommentSerializer(comments, many=True).data
-    
+    serialized_data["Votes"] = {
+            "Upvotes": post.upvotes(),
+            "Downvotes": post.downvotes()
+        }
+
     if request.method == 'POST':    # POST REQUEST
         serialized_data["Votes"] = {
             "Upvotes": post.upvotes(),
@@ -54,7 +60,7 @@ def DetailAPIView(request, pk):
             }
             serialized_data["Comments"] = CommentSerializer(comments, many=True).data
             return Response(serialized_data)
-        return Response("Sorry, you are not authorised to make changes to this Question...")    # IF ANY OTHER USER OTHER THAN THE AUTHOR TRIES TO UPDATE A QUESTION    
+        return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER OTHER THAN THE AUTHOR TRIES TO UPDATE A QUESTION    
 
     return Response(serialized_data)
 
@@ -66,7 +72,7 @@ def CommentAddAPIView(request, pk):
     try:
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
-        return Response("The given Question does not exist...")
+        return Response(status=status.HTTP_404_NOT_FOUND)
     comment = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post)
     serialized_data = CommentSerializer(comment, many=False)
     if request.data.get("description"):
@@ -81,7 +87,7 @@ def PostVoteAddAPIView(request, post_id, vote_type):
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
-        return Response("The given Question does not exist...")
+        return Response(status=status.HTTP_404_NOT_FOUND)
     if vote_type == 1:    # UPVOTE 
         vote = PostVote.objects.create(post=post, author=request.user, vote_type=1)
     elif vote_type == 0:    # DOWNVOTE
@@ -97,9 +103,9 @@ def PostDeleteAPIView(request, pk):
     try:
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
-        return Response("The given Question does not exist...")
+        return Response(status=status.HTTP_404_NOT_FOUND)
     if post.author == request.user:    # ONLY THE AUTHOR IS ALLOWED TO DELETE HIS/HER QUESTION
         post.delete()
-        return Response("Your Question has been successfully deleted...")
-    return Response("Sorry, you are not authorized to make changes to this question...")    # IF ANY OTHER USER ATTEMPTS TO DELETE A QUESTION
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER ATTEMPTS TO DELETE A QUESTION
 
