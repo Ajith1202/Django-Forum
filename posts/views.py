@@ -10,7 +10,7 @@ from .serializers import *
 @api_view(['GET', 'POST'])
 def ListAPIView(request):
     if request.method == 'GET':    # GET REQUEST
-        queryset = Post.objects.all()
+        queryset = Post.objects.all().order_by('-view_count')
         serializer = PostSerializer(queryset, many=True)
         data = serializer.data
         for post in data:
@@ -34,13 +34,17 @@ def DetailAPIView(request, pk):
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    serialized_data = PostSerializer(post, many=False).data
-    comments = post.comment_set.all()    # FETCHING ALL THE COMMENTS OF THE GIVEN POST
-    serialized_data["Comments"] = CommentSerializer(comments, many=True).data
-    serialized_data["Votes"] = {
-            "Upvotes": post.upvotes(),
-            "Downvotes": post.downvotes()
-        }
+    
+    if request.method == 'GET':
+        post.increment_view()
+        post.save(update_fields=("view_count",))      # INCREMENTING THE VIEW COUNT
+        serialized_data = PostSerializer(post, many=False).data
+        comments = post.comment_set.all()    # FETCHING ALL THE COMMENTS OF THE GIVEN POST
+        serialized_data["Comments"] = CommentSerializer(comments, many=True).data
+        serialized_data["Votes"] = {
+                "Upvotes": post.upvotes(),
+                "Downvotes": post.downvotes()
+            }
 
     if request.method == 'POST':    # POST REQUEST
         serialized_data["Votes"] = {

@@ -7,9 +7,13 @@ class Post(models.Model):
     title = models.CharField(max_length=120, null=False, blank=False)
     description = models.TextField()
     submitted_on = models.DateTimeField(auto_now_add=True)
+    view_count = models.IntegerField(default=0, null=True, blank=True)
 
     def __str__(self):
         return (str(self.title) + " by " + str(self.author.username))
+
+    def increment_view(self):
+        self.view_count = self.view_count + 1
 
     def upvotes(self):
         queryset = self.post_vote.all()
