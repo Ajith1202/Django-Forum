@@ -88,6 +88,10 @@ def PostVoteAddAPIView(request, post_id, vote_type):
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not request.user.is_authenticated:
+        content = {"Login to your account."}
+        return Response(content, status=status.HTTP_401_UNAUTHORIZED)
     if vote_type == 1:    # UPVOTE 
         vote = PostVote.objects.create(post=post, author=request.user, vote_type=1)
     elif vote_type == 0:    # DOWNVOTE
