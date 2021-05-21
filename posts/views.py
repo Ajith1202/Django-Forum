@@ -77,10 +77,11 @@ def CommentAddAPIView(request, pk):
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    comment = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post)
-    serialized_data = CommentSerializer(comment, many=False)
-    if request.data.get("description"):
-        return Response(serialized_data.data)    
+    if request.method == 'POST':
+        if request.data.get("description"):
+            comment = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post)
+            serialized_data = CommentSerializer(comment, many=False)
+            return Response(serialized_data.data)    
     return Response("Add content for your comment!!!")    # IF NO DESCRIPTION IS GIVEN FOR THE COMMENT
 
 
