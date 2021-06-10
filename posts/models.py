@@ -35,11 +35,23 @@ class Comment(models.Model):
     description = models.TextField(null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, null=False, blank=False)
+    
+    parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
+
     submitted_on = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return self.description
 
+    def children(self):
+        return Comment.objects.filter(parent=self)
+
+    @property
+    def is_parent(self):
+        if self.parent is None:
+            return True
+        return False
 
 class PostVote(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_vote")

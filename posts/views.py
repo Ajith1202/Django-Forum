@@ -39,7 +39,7 @@ def DetailAPIView(request, pk):
         post.increment_view()
         post.save(update_fields=("view_count",))      # INCREMENTING THE VIEW COUNT
         serialized_data = PostSerializer(post, many=False).data
-        comments = post.comment_set.all()    # FETCHING ALL THE COMMENTS OF THE GIVEN POST
+        comments = [i for i in post.comment_set.all() if i.is_parent]    # FETCHING ALL THE COMMENTS OF THE GIVEN POST
         serialized_data["Comments"] = CommentSerializer(comments, many=True).data
         serialized_data["Votes"] = {
                 "Upvotes": post.upvotes(),
@@ -77,12 +77,44 @@ def CommentAddAPIView(request, pk):
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        comments = [i for i in post.comment_set.all() if i.is_parent]
+        serialized_data = CommentSerializer(comments, many=True)
+        return Response(serialized_data.data)
     if request.method == 'POST':
         if request.data.get("description"):
             comment = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post)
             serialized_data = CommentSerializer(comment, many=False)
             return Response(serialized_data.data)    
     return Response("Add content for your comment!!!")    # IF NO DESCRIPTION IS GIVEN FOR THE COMMENT
+
+@api_view(['GET', 'POST'])
+def CommentReplyAPIView(request, pk, comment_id):
+    
+    try:
+        post = Post.objects.get(id=pk)
+    except Post.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    # Have to check if comment exists or not !!!!!
+    try:
+        comment = Comment.objects.get(id=comment_id)
+    except Comment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        queryset = comment.children()
+        serialized_data = CommentSerializer(queryset, many=True)
+        return Response(serialized_data.data)
+
+    if request.method == 'POST':
+        if request.data.get("description"):
+
+            comment_create = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post, parent=comment)
+            serialized_data = CommentSerializer(comment_create, many=False)
+            return Response(serialized_data.data)
+
+    return Response("Add content for your reply!!!")  
 
 
 # UPVOTE OR DOWNVOTE A QUESTION
