@@ -15,15 +15,15 @@ class Post(models.Model):
     def increment_view(self):
         self.view_count = self.view_count + 1
 
-    def upvotes(self):
+    def votes(self):
         queryset = self.post_vote.all()
-        queryset = [i.vote_type for i in queryset if i.vote_type == 1]
-        return len(queryset)
-
-    def downvotes(self):
-        queryset = self.post_vote.all()
-        queryset = [i.vote_type for i in queryset if i.vote_type == -1]
-        return len(queryset)
+        a, b = 0, 0
+        for i in queryset:
+            if i.vote_type == 1:
+                a += 1
+            if i.vote_type == -1:
+                b += 1
+        return (a, b)
     
     def vote_score(self):
         queryset = self.post_vote.all()
