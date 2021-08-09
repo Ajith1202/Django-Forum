@@ -12,8 +12,9 @@ class Post(models.Model):
     def __str__(self):
         return (str(self.title) + " by " + str(self.author.username))       # FOR THE ADMIN PANEL
 
-    def increment_view(self):       # ANYTIME A POST IS VIEWED, THIS METHOD GETS CALLED.
-        self.view_count = self.view_count + 1
+    def increment_view(self, curr_user):       # ANYTIME A POST IS VIEWED, THIS METHOD GETS CALLED.
+        if self.author != curr_user:
+            self.view_count = self.view_count + 1
 
     def votes(self):        # RETURNS THE NUMBER OF UPVOTES AND DOWNVOTES OF A POST, AS A TUPLE
         queryset = self.post_vote.all()

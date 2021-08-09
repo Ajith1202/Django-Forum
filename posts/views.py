@@ -37,7 +37,7 @@ def DetailAPIView(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
-        post.increment_view()
+        post.increment_view(request.user)
         post.save(update_fields=("view_count",))      # INCREMENTING THE VIEW COUNT
         serialized_data = PostSerializer(post, many=False).data
         comments = [i for i in post.comment_set.all() if i.is_parent]    # FETCHING ALL THE COMMENTS OF THE GIVEN POST
