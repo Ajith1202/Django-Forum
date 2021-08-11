@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth.registration',
 
+    'taggit',
+
     'posts.apps.PostsConfig',
 ]
 

@@ -46,7 +46,9 @@ def DetailAPIView(request, pk):
         serialized_data["Votes"] = {
                 "Upvotes": a,
                 "Downvotes": b
-            }
+            } 
+        serialized_data["tags"] = [i.name for i in post.tags.all()]
+
 
     if request.method == 'POST':    # POST REQUEST
         a, b = post.votes()
@@ -157,3 +159,19 @@ def PostDeleteAPIView(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
     return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER ATTEMPTS TO DELETE A QUESTION
 
+
+@api_view(['GET'])
+def TagSearchAPIView(request, tag_name):
+
+    queryset = Post.objects.filter(tags__name__in=[tag_name])
+
+    if queryset:
+        serializer = PostSerializer(queryset, many=True)
+        data = serializer.data
+        for post in data:
+            item = Post.objects.get(id=post["id"])    # FOR ACCESSING EACH POST
+            a, b = item.votes()
+            post["Upvotes"] = a
+            post["Downvotes"] = b
+        return Response(data)
+    return Response(status=status.HTTP_204_NO_CONTENT)
