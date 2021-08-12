@@ -24,7 +24,17 @@ def ListAPIView(request):
         description = request.data.get('description')
         post = Post.objects.create(title=title, description=description, author=request.user)    # THE CURRENT USER WILL BE THE AUTHOR.
         serializer = PostSerializer(post, many=False)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)  
+        
+        data = serializer.data
+
+        tags = request.data.get('tags')
+        if tags is not None:
+            for tag in tags:
+                post.tags.add(tag)
+            
+            data['tags'] = tags
+
+        return Response(data, status=status.HTTP_201_CREATED)  
 
 
 # DETAILED VIEW OF A QUESTION , UPDATE A QUESTION
