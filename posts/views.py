@@ -70,7 +70,26 @@ def DetailAPIView(request, pk):
 
     elif request.method == 'PUT':    # PUT REQUEST
         if post.author == request.user:    # ONLY ALLOW UPDATION BY THE AUTHOR OF THE QUESTION
-            serialized_data = PostSerializer(post, data=request.data, many=False)
+            
+            data = request.data
+            comments = [i for i in post.comment_set.all() if i.is_parent]
+            original_tags = set(i.name for i in post.tags.all())
+
+            if "tags" in data:
+                
+                updated_tags = set(data["tags"])
+
+                for tag in data["tags"]:
+                    if tag not in original_tags:
+                        post.tags.add(tag)
+
+                for tag in original_tags:
+                    if tag not in updated_tags:
+                        post.tags.remove(tag)                    
+
+                del data["tags"]
+
+            serialized_data = PostSerializer(post, data=data, many=False)
             if serialized_data.is_valid():
                 serialized_data.save()
                 serialized_data = serialized_data.data
@@ -80,6 +99,7 @@ def DetailAPIView(request, pk):
                 "Downvotes": b
             }
             serialized_data["Comments"] = CommentSerializer(comments, many=True).data
+            serialized_data["tags"] = [i.name for i in post.tags.all()]
             return Response(serialized_data)
         return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER OTHER THAN THE AUTHOR TRIES TO UPDATE A QUESTION    
 
