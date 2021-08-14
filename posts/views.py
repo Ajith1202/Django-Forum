@@ -149,6 +149,8 @@ def CommentReplyAPIView(request, pk, comment_id):
     if request.method == 'POST':
         if request.data.get("description"):
             #   CREATING A REPLY TO THE CURRENT COMMENT.
+            if not comment.is_parent:
+                return Response("Sorry, you can't reply to a reply")
             comment_create = Comment.objects.create(description=request.data.get('description'), author=request.user, post=post, parent=comment)
             serialized_data = CommentSerializer(comment_create, many=False)
             return Response(serialized_data.data)
