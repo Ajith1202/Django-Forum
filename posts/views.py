@@ -28,9 +28,9 @@ def ListAPIView(request):
         data = serializer.data
 
         tags = request.data.get('tags')
-        if tags is not None:
+        if tags is not None:    # IF THERE ARE TAGS TO BE ADDED
             for tag in tags:
-                post.tags.add(tag)
+                post.tags.add(tag)  # ADD THE TAG
             
             data['tags'] = tags
 
@@ -57,7 +57,7 @@ def DetailAPIView(request, pk):
                 "Upvotes": a,
                 "Downvotes": b
             } 
-        serialized_data["tags"] = [i.name for i in post.tags.all()]
+        serialized_data["tags"] = [i.name for i in post.tags.all()]     # LIST OF ALL TAGS CORRESPONDING TO THE POST
 
 
     if request.method == 'POST':    # POST REQUEST
@@ -73,21 +73,21 @@ def DetailAPIView(request, pk):
             
             data = request.data
             comments = [i for i in post.comment_set.all() if i.is_parent]
-            original_tags = set(i.name for i in post.tags.all())
+            original_tags = set(i.name for i in post.tags.all())    # THE INITIAL SET OF TAGS
 
-            if "tags" in data:
+            if "tags" in data:      # IF THE TAGS ARE TO BE UPDATED
                 
-                updated_tags = set(data["tags"])
+                updated_tags = set(data["tags"])    # SET OF UPDATED TAGS 
 
                 for tag in data["tags"]:
-                    if tag not in original_tags:
+                    if tag not in original_tags:    # THIS MEANS THAT THERE IS A NEW ADDITION TO THE INITIAL SET OF TAGS
                         post.tags.add(tag)
 
                 for tag in original_tags:
-                    if tag not in updated_tags:
+                    if tag not in updated_tags:     # THIS MEANS THAT THERE IS A REMOVAL OF THAT TAG FROM THE INIIAL SET OF TAGS
                         post.tags.remove(tag)                    
 
-                del data["tags"]
+                del data["tags"]    # FOR PASSING 'data' INTO THE POST SERIALIZER
 
             serialized_data = PostSerializer(post, data=data, many=False)
             if serialized_data.is_valid():
