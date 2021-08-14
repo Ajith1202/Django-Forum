@@ -1,6 +1,5 @@
 ## DJANGO-FORUM
 
----
 
 **Django Forum** is a REST API which serves endpoints for a Forum.
 
@@ -90,6 +89,8 @@ python manage.py runserver
 - Search for posts by tag
   
   - `GET /api/posts/search/<tag_name>/`
+
+---
 
 ### Packages Used
 
