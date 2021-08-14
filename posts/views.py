@@ -177,17 +177,19 @@ def PostVoteAddAPIView(request, post_id, vote_type):
 
 
 # DELETE A QUESTION 
-@api_view(['DELETE'])
+@api_view(['GET','DELETE'])
 def PostDeleteAPIView(request, pk):
     # TRY-EXCEPT CLAUSE IN-CASE THE QUESTION DOES NOT EXIST
     try:
         post = Post.objects.get(id=pk)
     except Post.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    if post.author == request.user:    # ONLY THE AUTHOR IS ALLOWED TO DELETE HIS/HER QUESTION
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER ATTEMPTS TO DELETE A QUESTION
+    
+    if request.method == 'DELETE':
+        if post.author == request.user:    # ONLY THE AUTHOR IS ALLOWED TO DELETE HIS/HER QUESTION
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER ATTEMPTS TO DELETE A QUESTION
 
 
 @api_view(['GET'])
