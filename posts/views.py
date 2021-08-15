@@ -194,6 +194,7 @@ def PostDeleteAPIView(request, pk):
         return Response(status=status.HTTP_401_UNAUTHORIZED)    # IF ANY OTHER USER ATTEMPTS TO DELETE A QUESTION
 
 
+# SEARCH FOR POSTS BY TAGS
 @api_view(['GET'])
 def TagSearchAPIView(request, tag_name):
 
